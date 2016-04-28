@@ -1,4 +1,6 @@
-<card>
+var $ = require('jquery');
+
+<card onmousedown={ onMouseDown } class={ showEmptySpace: showEmptySpace }>
     <div class="row">
         <div class="col-md-12">
             <div class="card">
@@ -24,6 +26,9 @@
     </div>
 
     <style>
+        card {
+            display: block;
+        }
         .card {
             margin-bottom: 10px;
             background-color: #FFF;
@@ -60,5 +65,56 @@
             border-radius: 3px;
             border: 1px solid #e3e3e3;
         }
+        .showEmptySpace .card > div {
+            opacity: 0;
+        }
+        .showEmptySpace .card {
+            box-shadow: none;
+            border: 3px dashed #516DBD;
+            background-color: #D2D2D2;
+            margin-top: -3px;
+            margin-bottom: 7px;
+        }
+        card.isDragging {
+            position: fixed;
+            z-index: 1;
+        }
     </style>
+
+    var self = this;
+
+    console.log('card', this);
+
+    this.onMouseDown = function (e) {
+        var $card = $(e.target).parents('card');
+        var $clone = $card.clone();
+        $clone.addClass('isClone');
+        self.$draggable = $card.after($clone).next();
+        self.$draggable.addClass('isDragging').width($card.width()).height($card.height());
+        console.log('$card', $card, e.pageX, $card.offset().left);
+        self.$draggable.css({
+            left: e.pageX,
+            top: e.pageY,
+            marginLeft: -(e.pageX-$card.offset().left),
+            marginTop: -(e.pageY-$card.offset().top)
+        });
+        $(window).mousemove(self.onDrag);
+        $(window).mouseup(self.onDragEnd);
+        self.showEmptySpace = true;
+    }
+
+    this.onDrag = function (e) {
+        // console.log('mousemove', e);
+        self.$draggable.css({left: e.pageX, top: e.pageY});
+        console.log('column', self.opts.column);
+        self.opts.column.trigger('card-drag', self, e.pageX, e.pageY);
+    }
+
+    this.onDragEnd = function (e) {
+        $(window).unbind('mousemove', self.onDrag);
+        $(window).unbind('mouseup', self.onDragEnd);
+        console.log('mousemove', e);
+        self.$draggable.css({left: e.pageX, top: e.pageY});
+        this.isDragging = false;
+    }
 </card>

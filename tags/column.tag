@@ -1,3 +1,4 @@
+var $ = require('jquery');
 require('./card.tag');
 
 <column class={ this.colclass }>
@@ -10,7 +11,7 @@ require('./card.tag');
         <div class="row">
             <div class="col-md-12">
                 <div class="cards">
-                    <card each={ cards }></card>
+                    <card each={ cards } column={ parent }></card>
                 </div>
             </div>
         </div>
@@ -44,9 +45,24 @@ require('./card.tag');
         }
     </style>
 
+    this.on('card-drag', function (card, x, y) {
+        console.log('card-drag', card, x, y, this);
+        $(this.root).find('.cards').children('card').each(function () {
+            if ($(this).hasClass('isClone')) {
+                return;
+            }
+            var _y = $(this).offset().top;
+            var _height = $(this).height();
+            console.log('y', y);
+            if (_y < y && y < _y + height) {
+                console.log('Hover over');
+            }
+        });
+    });
 
     this.on('mount', function(){
         this.colclass = "col-md-" + Math.floor(12 / this.columns.length);
         this.update();
     });
+
 </column>
